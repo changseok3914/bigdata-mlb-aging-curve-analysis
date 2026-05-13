@@ -157,6 +157,7 @@ Hive 테이블을 생성한 뒤 Spark SQL 또는 HiveQL을 이용해 나이별, 
 
 ## 6. Repository 구조 계획
 
+...
 bigdata-mlb-aging-curve-analysis/
 ├── README.md
 ├── data/
@@ -180,6 +181,7 @@ bigdata-mlb-aging-curve-analysis/
 │   └── figures/
 ├── report/
 └── .gitignore
+...
 
 ## 8. AI Tool Usage
 
