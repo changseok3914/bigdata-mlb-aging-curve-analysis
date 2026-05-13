@@ -180,3 +180,7 @@ bigdata-mlb-aging-curve-analysis/
 │   └── figures/
 ├── report/
 └── .gitignore
+
+## 8. AI Tool Usage
+
+- ChatGPT Thinking: README 초안 구체화 
