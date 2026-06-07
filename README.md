@@ -1,188 +1,185 @@
-# MLB 선수 노화 곡선 분석 및 다음 시즌 성과 예측
+﻿# MLB Aging Curve Big Data Analysis
 
-## 1. 프로젝트 개요
+## 1. Project Overview
 
-본 프로젝트는 MLB 선수들의 시즌별 성적 데이터를 수집하여, 나이에 따른 성적 변화 패턴(투수,타자)을 분석하고 다음 시즌 성과를 예측하는 빅데이터 처리·분석 시스템을 구현하는 것을 목표로 한다.
+본 프로젝트는 MLB 30세 이상 베테랑 선수들을 대상으로 Statcast 물리 지표와 시즌 성적 데이터를 결합하여, 선수의 나이에 따른 성과 변화와 다음 시즌 성과 예측 가능성을 분석하는 빅데이터 프로그래밍 프로젝트이다.
 
-야구 선수의 성적은 단순히 실력만으로 결정되지 않고, 나이, 경기 출장 수, 포지션, 전년도 성적, 투수/타자 유형 등에 따라 변화한다. 특히 선수의 전성기와 하락 시점을 파악하는 것은 구단의 선수 평가, 계약, 육성 전략에서 중요한 의미를 가진다.
+핵심 목표는 단순한 머신러닝 모델 구현이 아니라, 공개 야구 데이터를 수집하고 HDFS에 저장한 뒤 Spark/Hive 기반으로 전처리, 집계, 분석, 시각화를 수행하는 빅데이터 처리 파이프라인을 구성하는 것이다.
 
-본 프로젝트에서는 MLB 공개 데이터를 기반으로 선수의 나이와 성적 변화 사이의 관계를 분석하고, Spark와 Hive를 활용하여 대용량 야구 데이터를 처리한 뒤 선수 노화 패턴을 시각화하고자 한다.
+## 2. Research Questions
 
-## 2. 문제 정의
+1. 30세 이상 타자의 타구 질 지표는 나이에 따라 어떻게 변화하는가?
+2. 30세 이상 투수의 구속, 회전수, 릴리스 익스텐션은 나이에 따라 어떻게 변화하는가?
+3. 직구 계열 회전수와 변화구 회전수는 다음 시즌 WHIP과 어떤 관계를 가지는가?
+4. 나이와 전년도 성적만 사용한 기본 모델보다 Statcast 지표를 추가한 모델의 예측 성능이 개선되는가?
+5. 30세 이상 타자의 구속 구간별 타구 질 지표는 나이가 증가함에 따라 어떻게 변화하는가?
 
-### 2.1 풀고자 하는 문제
-> MLB 선수의 나이에 따른 성적 변화는 어떤 패턴을 보이며, 과거 성적과 나이를 이용해 다음 시즌 성과를 예측할 수 있는가?
+## 3. Data
 
-이를 위해 다음과 같은 세부 분석 질문이다.
-1. MLB 타자의 주요 성적 지표(출루율, 장타율, 타율, 컨택률, 베트스피드, 타구속도 등)는 나이에 따라 어떻게 변화하는가?
-2. MLB 투수의 주요 성적 지표(ERA, 피장타율, 삼진율, RPM 등)는 나이에 따라 어떻게 변화하는가?
-3. 선수의 전년도 성적과 나이를 이용해 다음 시즌 성과를 예측할 수 있는가?
-4. 타자와 투수의 노화 패턴은 서로 다르게 나타나는가?
-5. 특정 나이 구간에서 성적 하락 폭이 크게 나타나는가?
+### 3.1 Data Sources
 
-### 2.2 사용할 데이터
+- Statcast data: pybaseball을 이용해 MLB 투구/타구 단위 데이터를 수집
+- Lahman/Baseball Databank: Batting, Pitching, People 데이터를 이용해 시즌 성적 및 선수 나이 계산
 
-본 프로젝트에서는 MLB 공개 데이터를 사용한다. 선수의 나이에 따른 성적 변화와 노화 패턴을 분석하기 위해 시즌별 성적 데이터, 선수 기본 정보 데이터, Statcast 데이터를 활용할 예정이다.
+### 3.2 Data Period
 
-1. MLB 시즌별 선수 성적 데이터  
-   - 출처: Lahman Baseball Database
-   - 타자: 안타, 홈런, 타점, 볼넷, 삼진, 도루 등
-   - 투수: 이닝, 평균자책점, 탈삼진, 볼넷, 피홈런 등
-   - 타율, 출루율, 장타율, OPS, WHIP 등은 필요한 경우 직접 계산한다.
+- 2015년부터 2024년까지의 데이터를 사용
+- 2020년은 코로나 단축 시즌이므로 최종 분석에서 제외
+- Statcast 데이터는 전체 시즌 전수 데이터가 아니라, 각 시즌별 월별 구간 표본 데이터로 구성
 
-2. MLB 선수 기본 정보 데이터  
-   - 출처: Lahman Baseball Database
-   - 선수 ID, 이름, 생년월일, 투타 유형 등을 활용한다.
-   - 생년월일과 시즌 정보를 이용해 선수의 시즌별 나이를 계산한다.
+### 3.3 Data Size
 
-3. Statcast 데이터  
-   - 출처: Baseball Savant / pybaseball
-   - 투구 단위 또는 타구 단위 데이터를 활용한다.
-   - 주요 지표는 구속, RPM, 구종, 타구 속도, 발사각, 타석 결과 등이다.
+- 전체 raw 데이터는 누적 100MB 이상
+- 로컬 기준 data 폴더 전체 용량은 약 1GB 이상
+- GitHub에는 대용량 raw/processed 데이터는 업로드하지 않고 data/sample 폴더에 샘플 데이터만 포함
 
+## 4. System Architecture
 
-## 3. 기술 스택
-본 프로젝트에서 사용할 기술 스택은 다음과 같다.
+전체 처리 흐름은 다음과 같다.
 
-| 구분 | 사용 도구 | 역할 |
-|---|---|---|
-| 데이터 수집 | Python, pybaseball | MLB 선수 성적 및 Statcast 데이터 수집 |
-| 저장소 | HDFS | 수집한 데이터를 Hadoop 분산 파일 시스템에 저장 |
-| 전처리 | Apache Spark | 결측치 처리, 타입 변환, 선수별/시즌별 데이터 정리 |
-| 분석 | Spark SQL, HiveQL | 나이 구간별 성적 집계 및 비교 분석 |
-| 예측 모델 | Spark MLlib | 다음 시즌 성과 예측 모델 구현 |
-| 테이블 관리 | Apache Hive | 전처리된 데이터를 Hive 테이블로 관리 |
-| 시각화 | Python, Matplotlib, Plotly | 노화 곡선 및 예측 결과 시각화 |
-| 자동화 | Bash Script | 데이터 수집부터 분석까지 실행 흐름 자동화 |
-| 버전 관리 | Git, GitHub | 코드 및 산출물 관리 |
+1. Data Collection
+2. Local CSV Storage
+3. HDFS Upload
+4. Spark/Python Preprocessing
+5. Hive External Table Creation
+6. HiveQL Analysis
+7. Model A/B Comparison
+8. Visualization
+9. Report / Presentation
 
-핵심 데이터 처리와 분석은 Spark와 Hive를 중심으로 수행한다. Pandas는 결과 확인 또는 시각화 보조 용도로만 사용한다.
+## 5. Technology Stack
 
-## 4. 구현 계획
+- Python
+- pybaseball
+- HDFS
+- Spark / PySpark
+- Hive / HiveQL
+- Matplotlib
+- Scikit-learn 또는 Spark MLlib
+- GitHub
 
-본 프로젝트는 데이터 수집, HDFS 저장, Spark 기반 전처리, Hive/Spark SQL 분석, Spark MLlib 예측 모델, 시각화 순서로 진행할 예정이다.
+## 6. Repository Structure
 
-### 4.1 데이터 수집
+- README.md: 프로젝트 개요 및 실행 방법
+- data/README.md: 데이터 설명
+- data/sample/: GitHub 제출용 샘플 데이터
+- hive/create_tables.hql: Hive External Table 생성 쿼리
+- hive/analysis_queries.hql: Hive 분석 쿼리
+- scripts/upload_to_hdfs.sh: HDFS 업로드 스크립트
+- scripts/run_pipeline.sh: 전체 실행 스크립트
+- src/ingest/collect_data.py: 데이터 수집 코드
+- src/pipeline/build_features.py: 전처리 및 피처 생성 코드
+- src/pipeline/build_velocity_bins.py: 구속 구간별 분석 데이터 생성 코드
+- src/analyze/run_analysis.py: 연구질문별 분석 코드
+- src/model/train_models.py: 모델 성능 비교 코드
+- src/visualize/make_plots.py: 시각화 코드
+- results/tables/: 분석 결과 CSV
+- results/figures/: 결과 그래프
 
-본 프로젝트에서는 MLB 공개 데이터를 수집하여 분석에 활용한다. 데이터 수집은 Python 기반 스크립트로 수행하며, 수집한 데이터는 CSV 파일 형태로 저장한 뒤 HDFS에 적재할 예정이다.
+## 7. How to Run
 
-수집 대상 데이터는 다음과 같다.
+본 프로젝트의 최종 실행은 강의 실습 환경인 HDP Sandbox에서 수행하는 것을 기준으로 한다.
 
-- Lahman Baseball Database의 시즌별 타자 성적 데이터
-- Lahman Baseball Database의 시즌별 투수 성적 데이터
-- Lahman Baseball Database의 선수 기본 정보 데이터
-- Baseball Savant / pybaseball 기반 Statcast 데이터
-- 필요한 경우 선수 ID 매칭을 위한 Chadwick Register 데이터
+### 7.1 Upload Data to HDFS
 
-시즌별 성적 데이터는 선수의 나이별 성적 변화 분석에 활용하고, Statcast 데이터는 구속, RPM, 타구 속도, 발사각, 타석 결과 등 세부 경기 지표 분석에 활용한다.
+bash scripts/upload_to_hdfs.sh
 
-분석 기간은 주로 2015년부터 2025년까지의 MLB 시즌 데이터를 기준으로 설정할 예정이다.
+주요 HDFS 경로는 다음과 같다.
 
-### 4.2 HDFS 저장
+- /user/mlb/raw/statcast
+- /user/mlb/raw/lahman
+- /user/mlb/processed
+- /user/mlb/results/tables
 
-수집한 CSV 파일은 로컬 환경에 저장한 뒤 HDFS에 업로드한다.
+### 7.2 Create Hive Tables
 
-원천 데이터는 `/raw/` 경로에 저장하고, 전처리된 데이터는 `/processed/`, 분석 결과는 `/results/` 경로에 저장한다.
+hive -f hive/create_tables.hql
 
-### 4.3 Spark 기반 전처리
+### 7.3 Run Hive Analysis Queries
 
-HDFS에 저장된 원천 데이터를 Spark DataFrame으로 불러와 전처리한다.
+hive -f hive/analysis_queries.hql
 
-주요 전처리 내용은 다음과 같다.
-- 선수 ID와 시즌 기준으로 데이터 정리
+### 7.4 Run Full Pipeline
+
+bash scripts/run_pipeline.sh
+
+## 8. Main Process
+
+### 8.1 Data Collection
+
+src/ingest/collect_data.py는 Statcast 및 Lahman 데이터를 수집하기 위한 코드이다. 수집된 데이터는 data/raw/에 저장된다.
+
+### 8.2 Feature Engineering
+
+src/pipeline/build_features.py는 Lahman 시즌 성적과 Statcast 물리 지표를 결합하여 선수-시즌 단위 분석 데이터를 생성한다.
+
+주요 처리 내용은 다음과 같다.
+
 - 선수 나이 계산
-- 타자 데이터와 투수 데이터 분리
-- 결측치 처리
-- 숫자형/문자형 데이터 타입 변환
-- 나이 구간 생성
-- 전년도 성적과 다음 시즌 성적 컬럼 생성
-- 타구 속도, 배트 스피드, 구속, RPM 등 주요 지표 집계
+- 2020년 시즌 제외
+- 30세 이상 선수 필터링
+- 타자 OPS, OBP, SLG 계산
+- 투수 WHIP, ERA 계산
+- Statcast 타구/투구 지표 집계
+- Lahman ID와 MLBAM ID 매핑
+- 다음 시즌 성과 지표 생성
 
-전처리된 데이터는 Spark와 Hive에서 효율적으로 사용할 수 있도록 Parquet 형식으로 저장할 예정이다.
+### 8.3 Velocity Bin Analysis
 
-### 4.4 Hive 테이블 생성
+src/pipeline/build_velocity_bins.py는 타자가 상대 투구 구속 구간별로 어떤 타구 질을 보이는지 분석하기 위한 데이터를 생성한다.
 
-전처리된 데이터를 Hive 외부 테이블로 등록한다.
+구속 구간은 다음과 같이 구성하였다.
 
-예상 테이블은 다음과 같다.
-- 타자 시즌별 성적 테이블
-- 투수 시즌별 성적 테이블
-- Statcast 세부 지표 테이블
+- 85mph 미만
+- 85~90mph
+- 90~95mph
+- 95mph 이상
 
-Hive 테이블을 생성한 뒤 Spark SQL 또는 HiveQL을 이용해 나이별, 나이 구간별, 선수 유형별 성적 변화를 분석한다.
+### 8.4 Hive Analysis
 
-### 4.5 분석 및 예측
+hive/analysis_queries.hql에서는 단순 SELECT가 아니라 GROUP BY, CORR 등 통계적 분석 쿼리를 이용해 연구 질문에 답한다.
 
-본 프로젝트에서는 다음과 같은 분석을 수행할 예정이다.
+### 8.5 Model Comparison
 
-1. 타자의 나이별 성적 변화 분석  
-   - OPS, 출루율, 장타율, 타구 속도, 배트 스피드 등이 나이에 따라 어떻게 변화하는지 분석한다.
+src/model/train_models.py는 기본 성적 지표만 사용한 Model A와 Statcast 지표를 추가한 Model B의 예측 성능을 비교한다.
 
-2. 투수의 나이별 성적 변화 분석  
-   - ERA, WHIP, 구속, RPM 등이 나이에 따라 어떻게 변화하는지 분석한다.
+평가지표는 다음과 같다.
 
-3. 나이 구간별 성적 하락률 분석  
-   - 20대 초반, 20대 후반, 30대 초반, 30대 후반 이상의 구간으로 나누어 성적 하락 패턴을 비교한다.
+- RMSE
+- MAE
+- R2
 
-4. 다음 시즌 성과 예측  
-   - 선수의 나이와 전년도 성적을 입력 변수로 사용하여 다음 시즌 OPS 또는 ERA를 예측한다.
-   - 예측 모델은 Spark MLlib의 Linear Regression 또는 Random Forest Regression을 사용할 예정이다.
+## 9. Results
 
-### 4.6 시각화 및 결과 정리
+주요 결과 파일은 results/tables/와 results/figures/에 저장된다.
 
-분석 결과는 CSV 파일로 저장한 뒤 Python 시각화 도구를 활용하여 그래프로 표현한다.
+### 9.1 Tables
 
-예상 시각화 결과는 다음과 같다.
+- rq1_batter_age_group_summary.csv
+- rq2_pitcher_age_group_summary.csv
+- rq3_pitcher_spin_correlation.csv
+- rq4_model_performance_comparison.csv
+- rq5_batter_velocity_age_group_summary.csv
 
-- 나이별 평균 OPS 변화 그래프
-- 나이별 평균 ERA 변화 그래프
-- 나이별 평균 타구 속도 변화 그래프
-- 나이별 평균 배트 스피드 변화 그래프
-- 나이별 평균 구속 및 RPM 변화 그래프
-- 나이 구간별 성적 하락률 그래프
-- 실제 다음 시즌 성과와 예측 성과 비교 그래프
+### 9.2 Figures
 
+- rq1_batter_launch_speed_by_age_group.png
+- rq2_pitcher_release_speed_by_age_group.png
+- rq5_velocity_launch_speed_by_age_group.png
+- batter_velocity_hard_hit_rate_by_age_group.png
+- batter_velocity_estimated_woba_by_age_group.png
 
-## 5. 예상 결과물
+## 10. Limitations
 
-최종적으로 다음과 같은 결과를 도출하는 것을 목표로 한다.
-1. MLB 타자의 나이별 성적 변화 패턴
-2. MLB 투수의 나이별 성적 변화 패턴
-3. 타자와 투수의 노화 곡선 비교
-4. 나이 구간별 성적 하락률 분석
-5. 전년도 성적과 나이를 활용한 다음 시즌 성과 예측 결과
-6. HDFS, Spark, Hive를 활용한 야구 데이터 처리 파이프라인
+본 프로젝트는 다음과 같은 한계를 가진다.
 
----
+1. Statcast 데이터는 전체 시즌 전수 데이터가 아니라 월별 구간 표본 데이터이다.
+2. 30세 이상 선수만 대상으로 하므로 젊은 선수와 직접 비교하지 않는다.
+3. 다음 시즌 성과가 존재하는 선수만 모델 데이터에 포함되므로 은퇴 또는 방출 선수는 제외된다.
+4. 구장 효과, 수비력, 리그 환경 변화 등은 완전히 통제하지 못했다.
+5. 예측 모델은 프로젝트의 중심이 아니라 Statcast 지표의 추가 설명력을 확인하기 위한 보조 분석이다.
 
-## 6. Repository 구조 계획
+## 11. AI Tool Usage
 
-...
-bigdata-mlb-aging-curve-analysis/
-├── README.md
-├── data/
-│   ├── README.md
-│   └── sample/
-├── src/
-│   ├── ingest/
-│   │   └── collect_mlb_data.py
-│   ├── pipeline/
-│   │   └── preprocess_spark.py
-│   ├── analyze/
-│   │   └── aging_curve_analysis.py
-│   └── model/
-│       └── predict_next_season.py
-├── hive/
-│   └── create_tables.sql
-├── scripts/
-│   └── run_pipeline.sh
-├── results/
-│   ├── tables/
-│   └── figures/
-├── report/
-└── .gitignore
-...
-
-## 8. AI Tool Usage
-
-- ChatGPT Thinking: README 초안 구체화 
+- ChatGPT: 프로젝트 구조 점검, README 구성 정리, 코드 파일 분리 방향 제안, 보고서 목차 및 발표 흐름 정리
+- AI 도구는 코드 디버깅과 문서 정리 보조 목적으로 사용하였으며, 최종 데이터 처리와 분석 결과는 직접 실행한 결과를 기반으로 작성하였다.
