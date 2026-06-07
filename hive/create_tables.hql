@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS batter_final_model_data;
+DROP TABLE IF EXISTS batter_final_model_data;
 DROP TABLE IF EXISTS pitcher_final_model_data;
 DROP TABLE IF EXISTS statcast_batter_velocity_bin_summary;
 DROP TABLE IF EXISTS model_performance_comparison;
@@ -23,7 +23,7 @@ CREATE EXTERNAL TABLE batter_final_model_data (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
-LOCATION '/user/mlb/processed/batter_final_model_data'
+LOCATION '/user/maria_dev/mlb/processed/batter_final_model_data'
 TBLPROPERTIES ('skip.header.line.count'='1');
 
 CREATE EXTERNAL TABLE pitcher_final_model_data (
@@ -60,7 +60,7 @@ CREATE EXTERNAL TABLE pitcher_final_model_data (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
-LOCATION '/user/mlb/processed/pitcher_final_model_data'
+LOCATION '/user/maria_dev/mlb/processed/pitcher_final_model_data'
 TBLPROPERTIES ('skip.header.line.count'='1');
 
 CREATE EXTERNAL TABLE statcast_batter_velocity_bin_summary (
@@ -93,7 +93,7 @@ CREATE EXTERNAL TABLE statcast_batter_velocity_bin_summary (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
-LOCATION '/user/mlb/processed/statcast_batter_velocity_bin_summary'
+LOCATION '/user/maria_dev/mlb/processed/statcast_batter_velocity_bin_summary'
 TBLPROPERTIES ('skip.header.line.count'='1');
 
 CREATE EXTERNAL TABLE model_performance_comparison (
@@ -112,5 +112,5 @@ CREATE EXTERNAL TABLE model_performance_comparison (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
-LOCATION '/user/mlb/results/tables/rq4_model_performance_comparison'
+LOCATION '/user/maria_dev/mlb/results/tables/rq4_model_performance_comparison'
 TBLPROPERTIES ('skip.header.line.count'='1');
