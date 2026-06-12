@@ -2,184 +2,490 @@
 
 ## 1. Project Overview
 
-º» ÇÁ·ÎÁ§Æ®´Â MLB 30¼¼ ÀÌ»ó º£Å×¶û ¼±¼öµéÀ» ´ë»óÀ¸·Î Statcast ¹°¸® ÁöÇ¥¿Í ½ÃÁğ ¼ºÀû µ¥ÀÌÅÍ¸¦ °áÇÕÇÏ¿©, ¼±¼öÀÇ ³ªÀÌ¿¡ µû¸¥ ¼º°ú º¯È­¿Í ´ÙÀ½ ½ÃÁğ ¼º°ú ¿¹Ãø °¡´É¼ºÀ» ºĞ¼®ÇÏ´Â ºòµ¥ÀÌÅÍ ÇÁ·Î±×·¡¹Ö ÇÁ·ÎÁ§Æ®ÀÌ´Ù.
+ë³¸ í”„ë¡œì íŠ¸ëŠ” MLB 30ì„¸ ì´ìƒ ë² í…Œë‘ ì„ ìˆ˜ë¥¼ ëŒ€ìƒìœ¼ë¡œ Statcast ê¸°ë°˜ ë¬¼ë¦¬ ì§€í‘œì™€ Lahman/Baseball Databankì˜ ì‹œì¦Œ ì„±ì  ë°ì´í„°ë¥¼ ê²°í•©í•˜ì—¬, ë‚˜ì´êµ¬ê°„ë³„ ì„±ê³¼ ë³€í™”ì™€ ë‹¤ìŒ ì‹œì¦Œ ì„±ê³¼ ì˜ˆì¸¡ ê°€ëŠ¥ì„±ì„ ë¶„ì„í•œ ë¹…ë°ì´í„° í”„ë¡œê·¸ë˜ë° ê¸°ë§ í”„ë¡œì íŠ¸ì´ë‹¤.
 
-ÇÙ½É ¸ñÇ¥´Â ´Ü¼øÇÑ ¸Ó½Å·¯´× ¸ğµ¨ ±¸ÇöÀÌ ¾Æ´Ï¶ó, °ø°³ ¾ß±¸ µ¥ÀÌÅÍ¸¦ ¼öÁıÇÏ°í HDFS¿¡ ÀúÀåÇÑ µÚ Spark/Hive ±â¹İÀ¸·Î ÀüÃ³¸®, Áı°è, ºĞ¼®, ½Ã°¢È­¸¦ ¼öÇàÇÏ´Â ºòµ¥ÀÌÅÍ Ã³¸® ÆÄÀÌÇÁ¶óÀÎÀ» ±¸¼ºÇÏ´Â °ÍÀÌ´Ù.
+ë¶„ì„ì˜ í•µì‹¬ì€ ë‹¨ìˆœíˆ ì‹œì¦Œ ì„±ì ë§Œ ë¹„êµí•˜ëŠ” ê²ƒì´ ì•„ë‹ˆë¼, íƒ€êµ¬ì†ë„, í•˜ë“œíˆíŠ¸ìœ¨, íˆ¬êµ¬ êµ¬ì†, íšŒì „ìˆ˜, xwOBA, xSLG ë“± Statcast ì„¸ë¶€ ì§€í‘œë¥¼ ì„ ìˆ˜-ì‹œì¦Œ ë‹¨ìœ„ë¡œ ì§‘ê³„í•˜ê³ , OPSì™€ WHIP ê°™ì€ ì‹œì¦Œ ì„±ê³¼ ì§€í‘œì™€ ì—°ê²°í•˜ëŠ” ê²ƒì´ë‹¤.
 
-## 2. Research Questions
+ê³¼ì œ ê´€ì ì—ì„œëŠ” ê³µê°œ ì•¼êµ¬ ë°ì´í„°ë¥¼ ìˆ˜ì§‘í•˜ê³ , Python/Spark ê¸°ë°˜ ì „ì²˜ë¦¬ë¥¼ í†µí•´ ë¶„ì„ìš© CSVë¥¼ ìƒì„±í•œ ë’¤, HDFSì— ì ì¬í•˜ê³  Hive External Table, HiveQL ë¶„ì„, ëª¨ë¸ ì„±ëŠ¥ ë¹„êµ, ì‹œê°í™”ê¹Œì§€ ì—°ê²°í•˜ëŠ” ë¹…ë°ì´í„° ì²˜ë¦¬ íŒŒì´í”„ë¼ì¸ì„ êµ¬í˜„í•˜ëŠ” ë° ì¤‘ì ì„ ë‘ì—ˆë‹¤.
 
-1. 30¼¼ ÀÌ»ó Å¸ÀÚÀÇ Å¸±¸ Áú ÁöÇ¥´Â ³ªÀÌ¿¡ µû¶ó ¾î¶»°Ô º¯È­ÇÏ´Â°¡?
-2. 30¼¼ ÀÌ»ó Åõ¼öÀÇ ±¸¼Ó, È¸Àü¼ö, ¸±¸®½º ÀÍ½ºÅÙ¼ÇÀº ³ªÀÌ¿¡ µû¶ó ¾î¶»°Ô º¯È­ÇÏ´Â°¡?
-3. Á÷±¸ °è¿­ È¸Àü¼ö¿Í º¯È­±¸ È¸Àü¼ö´Â ´ÙÀ½ ½ÃÁğ WHIP°ú ¾î¶² °ü°è¸¦ °¡Áö´Â°¡?
-4. ³ªÀÌ¿Í Àü³âµµ ¼ºÀû¸¸ »ç¿ëÇÑ ±âº» ¸ğµ¨º¸´Ù Statcast ÁöÇ¥¸¦ Ãß°¡ÇÑ ¸ğµ¨ÀÇ ¿¹Ãø ¼º´ÉÀÌ °³¼±µÇ´Â°¡?
-5. 30¼¼ ÀÌ»ó Å¸ÀÚÀÇ ±¸¼Ó ±¸°£º° Å¸±¸ Áú ÁöÇ¥´Â ³ªÀÌ°¡ Áõ°¡ÇÔ¿¡ µû¶ó ¾î¶»°Ô º¯È­ÇÏ´Â°¡?
+---
 
-## 3. Data
+## 2. Problem Definition
 
-### 3.1 Data Sources
+í”„ë¡œ ìŠ¤í¬ì¸ ì—ì„œ ì„ ìˆ˜ì˜ ë‚˜ì´ëŠ” ê²½ê¸°ë ¥ ë³€í™”, ê³„ì•½, ì„ ë°œ, ìœ¡ì„± ì „ëµì— ì§ì ‘ì ì¸ ì˜í–¥ì„ ì¤€ë‹¤. íŠ¹íˆ MLBì—ì„œëŠ” 30ì„¸ ì´í›„ì—ë„ ê²½í—˜ê³¼ ê¸°ìˆ ì„ ë°”íƒ•ìœ¼ë¡œ ì„±ê³¼ë¥¼ ìœ ì§€í•˜ëŠ” ì„ ìˆ˜ê°€ ìˆëŠ” ë°˜ë©´, ì‹ ì²´ ëŠ¥ë ¥ ì €í•˜ë¡œ íƒ€êµ¬ ì§ˆ, êµ¬ì†, íšŒì „ìˆ˜ ë“± ë¬¼ë¦¬ ì§€í‘œê°€ ë³€í™”í•  ê°€ëŠ¥ì„±ë„ ì¡´ì¬í•œë‹¤.
 
-- Statcast data: pybaseballÀ» ÀÌ¿ëÇØ MLB Åõ±¸/Å¸±¸ ´ÜÀ§ µ¥ÀÌÅÍ¸¦ ¼öÁı
-- Lahman/Baseball Databank: Batting, Pitching, People µ¥ÀÌÅÍ¸¦ ÀÌ¿ëÇØ ½ÃÁğ ¼ºÀû ¹× ¼±¼ö ³ªÀÌ °è»ê
+ë”°ë¼ì„œ 30ì„¸ ì´ìƒ ì„ ìˆ˜ì˜ ì„±ê³¼ ë³€í™”ë¥¼ ë‹¨ìˆœ ì‹œì¦Œ ì„±ì ë§Œìœ¼ë¡œ íŒë‹¨í•˜ê¸°ë³´ë‹¤, Statcast ê¸°ë°˜ ë¬¼ë¦¬ ì§€í‘œì™€ í•¨ê»˜ ë¶„ì„í•  í•„ìš”ê°€ ìˆë‹¤. ë³¸ í”„ë¡œì íŠ¸ëŠ” Lahmanì˜ ì‹œì¦Œ ì„±ì  ë°ì´í„°ì™€ Statcastì˜ ì„¸ë¶€ ë¬¼ë¦¬ ì§€í‘œë¥¼ ê²°í•©í•˜ì—¬ 30ì„¸ ì´í›„ ì„ ìˆ˜ì˜ ì„±ê³¼ ë³€í™”ê°€ ì‹¤ì œ ê²½ê¸° ê³¼ì •ì—ì„œ ì–´ë–¤ í˜•íƒœë¡œ ë‚˜íƒ€ë‚˜ëŠ”ì§€ í™•ì¸í•˜ê³ ì í•˜ì˜€ë‹¤.
 
-### 3.2 Data Period
+---
 
-- 2015³âºÎÅÍ 2024³â±îÁöÀÇ µ¥ÀÌÅÍ¸¦ »ç¿ë
-- 2020³âÀº ÄÚ·Î³ª ´ÜÃà ½ÃÁğÀÌ¹Ç·Î ÃÖÁ¾ ºĞ¼®¿¡¼­ Á¦¿Ü
-- Statcast µ¥ÀÌÅÍ´Â ÀüÃ¼ ½ÃÁğ Àü¼ö µ¥ÀÌÅÍ°¡ ¾Æ´Ï¶ó, °¢ ½ÃÁğº° ¿ùº° ±¸°£ Ç¥º» µ¥ÀÌÅÍ·Î ±¸¼º
+## 3. Research Questions
 
-### 3.3 Data Size
+ë³¸ í”„ë¡œì íŠ¸ì˜ ì—°êµ¬ ì§ˆë¬¸ì€ ë‹¤ìŒê³¼ ê°™ë‹¤.
 
-- ÀüÃ¼ raw µ¥ÀÌÅÍ´Â ´©Àû 100MB ÀÌ»ó
-- ·ÎÄÃ ±âÁØ data Æú´õ ÀüÃ¼ ¿ë·®Àº ¾à 1GB ÀÌ»ó
-- GitHub¿¡´Â ´ë¿ë·® raw/processed µ¥ÀÌÅÍ´Â ¾÷·ÎµåÇÏÁö ¾Ê°í data/sample Æú´õ¿¡ »ùÇÃ µ¥ÀÌÅÍ¸¸ Æ÷ÇÔ
+1. 30ì„¸ ì´ìƒ íƒ€ìì˜ ë‚˜ì´êµ¬ê°„ë³„ íƒ€êµ¬ ì§ˆì€ ì–´ë–»ê²Œ ë³€í™”í•˜ëŠ”ê°€?
+2. 30ì„¸ ì´ìƒ íˆ¬ìˆ˜ì˜ êµ¬ì†ê³¼ íšŒì „ìˆ˜ëŠ” ë‚˜ì´êµ¬ê°„ë³„ë¡œ ì–´ë–»ê²Œ ë³€í™”í•˜ëŠ”ê°€?
+3. ì§êµ¬/ë³€í™”êµ¬ íšŒì „ìˆ˜ì™€ í‰ê·  êµ¬ì†ì€ ë‹¤ìŒ ì‹œì¦Œ WHIPê³¼ ì–´ë–¤ ê´€ê³„ë¥¼ ê°€ì§€ëŠ”ê°€?
+4. ê¸°ë³¸ ì„±ì  ë³€ìˆ˜ë§Œ ì‚¬ìš©í•œ ëª¨ë¸ê³¼ Statcast ì§€í‘œë¥¼ ì¶”ê°€í•œ ëª¨ë¸ì˜ ì˜ˆì¸¡ ì„±ëŠ¥ì€ ì°¨ì´ê°€ ìˆëŠ”ê°€?
+5. íƒ€ìëŠ” íˆ¬êµ¬ êµ¬ì† êµ¬ê°„ì— ë”°ë¼ ë‚˜ì´êµ¬ê°„ë³„ íƒ€êµ¬ ì§ˆ ì°¨ì´ë¥¼ ë³´ì´ëŠ”ê°€?
 
-## 4. System Architecture
+---
 
-ÀüÃ¼ Ã³¸® Èå¸§Àº ´ÙÀ½°ú °°´Ù.
+## 4. Data
+
+### 4.1 Data Sources
+
+ë³¸ í”„ë¡œì íŠ¸ì—ì„œëŠ” í¬ê²Œ ë‘ ì¢…ë¥˜ì˜ ë°ì´í„°ë¥¼ ì‚¬ìš©í•˜ì˜€ë‹¤.
+
+* Statcast data
+
+  * `pybaseball`ì„ ì´ìš©í•´ MLB íˆ¬êµ¬Â·íƒ€êµ¬ ë‹¨ìœ„ ë°ì´í„°ë¥¼ ìˆ˜ì§‘
+  * ì£¼ìš” ì»¬ëŸ¼: `release_speed`, `release_spin_rate`, `release_extension`, `launch_speed`, `launch_angle`, `estimated_woba_using_speedangle`, `estimated_slg_using_speedangle` ë“±
+
+* Lahman/Baseball Databank
+
+  * Batting, Pitching, People ë°ì´í„°ë¥¼ ì‚¬ìš©
+  * ì„ ìˆ˜ë³„ ì‹œì¦Œ ì„±ì , ìƒë…„, ì„ ìˆ˜ ID, OPS, WHIP, ERA, ë‚˜ì´ ê³„ì‚° ë“±ì— í™œìš©
+
+### 4.2 Data Period
+
+* ë¶„ì„ ê¸°ê°„: 2015ë…„ë¶€í„° 2024ë…„ê¹Œì§€
+* 2020ë…„ì€ ì½”ë¡œë‚˜ ë‹¨ì¶• ì‹œì¦Œì´ë¯€ë¡œ ìµœì¢… ë¶„ì„ì—ì„œ ì œì™¸
+* Statcast ë°ì´í„°ëŠ” ì „ì²´ ì‹œì¦Œ ì „ìˆ˜ ë°ì´í„°ê°€ ì•„ë‹ˆë¼, ê° ì‹œì¦Œë³„ ì›”ë³„ í‘œë³¸ CSVë¡œ êµ¬ì„±
+
+### 4.3 Data Size
+
+ì „ì²´ ë°ì´í„°ëŠ” ë‹¨ì¼ CSV íŒŒì¼ 1ê±´ì´ ì•„ë‹ˆë¼ ì—¬ëŸ¬ CSV íŒŒì¼ì˜ ëˆ„ì  ê¸°ì¤€ìœ¼ë¡œ êµ¬ì„±í•˜ì˜€ë‹¤.
+
+* ë¡œì»¬ `data` í´ë” ê¸°ì¤€ ì „ì²´ í¬ê¸°: ì•½ 1.12GB
+* HDFS raw ë°ì´í„°: ì•½ 970.6MB
+* ì „ì²´ HDFS ì ì¬ ê·œëª¨: ì•½ 979MB
+* ê³¼ì œ ìš”êµ¬ì‚¬í•­ì¸ ëˆ„ì  100MB ì´ìƒì˜ ë°ì´í„° í™•ë³´ ì¡°ê±´ì„ ì¶©ì¡±í•¨
+
+GitHubì—ëŠ” ëŒ€ìš©ëŸ‰ raw/processed ë°ì´í„° ì „ì²´ë¥¼ ì—…ë¡œë“œí•˜ì§€ ì•Šê³ , ì œì¶œ í™•ì¸ìš© ìƒ˜í”Œ ë°ì´í„°ì™€ ë¶„ì„ ê²°ê³¼ íŒŒì¼ë§Œ í¬í•¨í•˜ì˜€ë‹¤.
+
+---
+
+## 5. System Architecture
+
+ì „ì²´ ë°ì´í„° ì²˜ë¦¬ íë¦„ì€ ë‹¤ìŒê³¼ ê°™ë‹¤.
 
 1. Data Collection
 2. Local CSV Storage
-3. HDFS Upload
-4. Spark/Python Preprocessing
+3. Python/Spark Preprocessing
+4. HDFS Upload
 5. Hive External Table Creation
 6. HiveQL Analysis
 7. Model A/B Comparison
 8. Visualization
-9. Report / Presentation
+9. Final Report
 
-## 5. Technology Stack
+ì¦‰, ì›ë³¸ ë°ì´í„°ëŠ” ë¨¼ì € ë¡œì»¬ í™˜ê²½ì—ì„œ ìˆ˜ì§‘í•˜ê³ , Python/Spark ê¸°ë°˜ ì „ì²˜ë¦¬ë¥¼ í†µí•´ ì„ ìˆ˜-ì‹œì¦Œ ë‹¨ìœ„ ë¶„ì„ìš© ë°ì´í„°ë¥¼ ìƒì„±í•˜ì˜€ë‹¤. ì´í›„ ìƒì„±ëœ raw/processed CSVë¥¼ HDP Sandboxì˜ HDFS ê²½ë¡œì— ì ì¬í•˜ê³ , Hive External Tableë¡œ ë“±ë¡í•˜ì—¬ HiveQL ë¶„ì„ì„ ìˆ˜í–‰í•˜ì˜€ë‹¤.
 
-- Python
-- pybaseball
-- HDFS
-- Spark / PySpark
-- Hive / HiveQL
-- Matplotlib
-- Scikit-learn ¶Ç´Â Spark MLlib
-- GitHub
+ì£¼ìš” HDFS ê²½ë¡œëŠ” ë‹¤ìŒê³¼ ê°™ë‹¤.
 
-## 6. Repository Structure
+```text
+/user/maria_dev/mlb/raw/statcast
+/user/maria_dev/mlb/raw/lahman
+/user/maria_dev/mlb/processed
+/user/maria_dev/mlb/results/tables
+/user/maria_dev/mlb/sample
+```
 
-- README.md: ÇÁ·ÎÁ§Æ® °³¿ä ¹× ½ÇÇà ¹æ¹ı
-- data/README.md: µ¥ÀÌÅÍ ¼³¸í
-- data/sample/: GitHub Á¦Ãâ¿ë »ùÇÃ µ¥ÀÌÅÍ
-- hive/create_tables.hql: Hive External Table »ı¼º Äõ¸®
-- hive/analysis_queries.hql: Hive ºĞ¼® Äõ¸®
-- scripts/upload_to_hdfs.sh: HDFS ¾÷·Îµå ½ºÅ©¸³Æ®
-- scripts/run_pipeline.sh: ÀüÃ¼ ½ÇÇà ½ºÅ©¸³Æ®
-- src/ingest/collect_data.py: µ¥ÀÌÅÍ ¼öÁı ÄÚµå
-- src/pipeline/build_features.py: ÀüÃ³¸® ¹× ÇÇÃ³ »ı¼º ÄÚµå
-- src/pipeline/build_velocity_bins.py: ±¸¼Ó ±¸°£º° ºĞ¼® µ¥ÀÌÅÍ »ı¼º ÄÚµå
-- src/analyze/run_analysis.py: ¿¬±¸Áú¹®º° ºĞ¼® ÄÚµå
-- src/model/train_models.py: ¸ğµ¨ ¼º´É ºñ±³ ÄÚµå
-- src/visualize/make_plots.py: ½Ã°¢È­ ÄÚµå
-- results/tables/: ºĞ¼® °á°ú CSV
-- results/figures/: °á°ú ±×·¡ÇÁ
+---
 
-## 7. How to Run
+## 6. Technology Stack
 
-º» ÇÁ·ÎÁ§Æ®ÀÇ ÃÖÁ¾ ½ÇÇàÀº °­ÀÇ ½Ç½À È¯°æÀÎ HDP Sandbox¿¡¼­ ¼öÇàÇÏ´Â °ÍÀ» ±âÁØÀ¸·Î ÇÑ´Ù.
+ë³¸ í”„ë¡œì íŠ¸ì—ì„œ ì‚¬ìš©í•œ ì£¼ìš” ê¸°ìˆ ì€ ë‹¤ìŒê³¼ ê°™ë‹¤.
 
-### 7.1 Upload Data to HDFS
+* Python
+* Pandas / NumPy
+* pybaseball
+* Hadoop HDFS
+* Apache Hive / HiveQL
+* Python/Spark ê¸°ë°˜ ì „ì²˜ë¦¬ êµ¬ì¡°
+* scikit-learn
+* Matplotlib
+* GitHub
 
-bash scripts/upload_to_hdfs.sh
+ê°•ì˜ì—ì„œ ë‹¤ë£¬ ë¹…ë°ì´í„° ì²˜ë¦¬ ê¸°ìˆ  ì¤‘ HDFSì™€ Hiveë¥¼ í•µì‹¬ ì»´í¬ë„ŒíŠ¸ë¡œ ì‚¬ìš©í•˜ì˜€ê³ , Python/Spark ê¸°ë°˜ ì „ì²˜ë¦¬ êµ¬ì¡°ë¥¼ í•¨ê»˜ êµ¬ì„±í•˜ì˜€ë‹¤.
 
-ÁÖ¿ä HDFS °æ·Î´Â ´ÙÀ½°ú °°´Ù.
+---
 
-- /user/maria_dev/mlb/raw/statcast
-- /user/maria_dev/mlb/raw/lahman
-- /user/maria_dev/mlb/processed
-- /user/maria_dev/mlb/results/tables
+## 7. Repository Structure
 
-### 7.2 Create Hive Tables
+```text
+.
+â”œâ”€â”€ README.md
+â”œâ”€â”€ .gitignore
+â”œâ”€â”€ data/
+â”‚   â”œâ”€â”€ README.md
+â”‚   â””â”€â”€ sample/
+â”œâ”€â”€ hive/
+â”‚   â”œâ”€â”€ create_tables.hql
+â”‚   â””â”€â”€ analysis_queries.hql
+â”œâ”€â”€ scripts/
+â”‚   â”œâ”€â”€ upload_to_hdfs.sh
+â”‚   â””â”€â”€ run_pipeline.sh
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ ingest/
+â”‚   â”‚   â””â”€â”€ collect_data.py
+â”‚   â”œâ”€â”€ pipeline/
+â”‚   â”‚   â”œâ”€â”€ build_features.py
+â”‚   â”‚   â””â”€â”€ build_velocity_bins.py
+â”‚   â”œâ”€â”€ analyze/
+â”‚   â”‚   â””â”€â”€ run_analysis.py
+â”‚   â”œâ”€â”€ model/
+â”‚   â”‚   â””â”€â”€ train_models.py
+â”‚   â””â”€â”€ visualize/
+â”‚       â””â”€â”€ make_plots.py
+â””â”€â”€ results/
+    â”œâ”€â”€ tables/
+    â””â”€â”€ figures/
+```
 
-hive -f hive/create_tables.hql
+### ì£¼ìš” íŒŒì¼ ì„¤ëª…
 
-### 7.3 Run Hive Analysis Queries
+* `src/ingest/collect_data.py`
 
-hive -f hive/analysis_queries.hql
+  * Lahman ë°ì´í„°ì™€ Statcast ë°ì´í„°ë¥¼ ìˆ˜ì§‘í•˜ëŠ” ì½”ë“œ
 
-### 7.4 Run Full Pipeline
+* `src/pipeline/build_features.py`
 
-bash scripts/run_pipeline.sh
+  * Lahman ì‹œì¦Œ ì„±ì ê³¼ Statcast ì§€í‘œë¥¼ ê²°í•©í•˜ì—¬ ì„ ìˆ˜-ì‹œì¦Œ ë‹¨ìœ„ ë¶„ì„ ë°ì´í„°ë¥¼ ìƒì„±í•˜ëŠ” ì½”ë“œ
 
-## 8. Main Process
+* `src/pipeline/build_velocity_bins.py`
+
+  * íˆ¬êµ¬ êµ¬ì† êµ¬ê°„ë³„ íƒ€ì íƒ€êµ¬ ì§ˆ ë¶„ì„ìš© ë°ì´í„°ë¥¼ ìƒì„±í•˜ëŠ” ì½”ë“œ
+
+* `src/analyze/run_analysis.py`
+
+  * ì—°êµ¬ì§ˆë¬¸ë³„ ì§‘ê³„, ëª¨ë¸ ì„±ëŠ¥ ë¹„êµ, ê²°ê³¼í‘œ ë° ê·¸ë˜í”„ ìƒì„±ì„ ìˆ˜í–‰í•˜ëŠ” ë¶„ì„ ì½”ë“œ
+
+* `src/model/train_models.py`
+
+  * Model A/B ì„±ëŠ¥ ë¹„êµ ì‹¤í–‰ìš© wrapper ì½”ë“œ
+
+* `src/visualize/make_plots.py`
+
+  * ê²°ê³¼ ì‹œê°í™” ìƒì„± ì½”ë“œ
+
+* `hive/create_tables.hql`
+
+  * HDFSì˜ processed CSVë¥¼ Hive External Tableë¡œ ë“±ë¡í•˜ëŠ” ì¿¼ë¦¬
+
+* `hive/analysis_queries.hql`
+
+  * RQ1~RQ5 ë¶„ì„ì„ ìœ„í•œ HiveQL ì¿¼ë¦¬
+
+* `scripts/upload_to_hdfs.sh`
+
+  * ë¡œì»¬ì—ì„œ ìƒì„±ëœ raw/processed/result CSV íŒŒì¼ì„ HDFSë¡œ ì—…ë¡œë“œí•˜ëŠ” ìŠ¤í¬ë¦½íŠ¸
+
+* `scripts/run_pipeline.sh`
+
+  * HDFS ì—…ë¡œë“œ, Hive í…Œì´ë¸” ìƒì„±, Hive ë¶„ì„ ì¿¼ë¦¬ ì‹¤í–‰ì„ ìˆœì„œëŒ€ë¡œ ìˆ˜í–‰í•˜ëŠ” ìŠ¤í¬ë¦½íŠ¸
+
+---
+
+## 8. How to Run
+
+ë³¸ í”„ë¡œì íŠ¸ì˜ ì‹¤í–‰ì€ ê°•ì˜ ì‹¤ìŠµ í™˜ê²½ì¸ HDP Sandboxë¥¼ ê¸°ì¤€ìœ¼ë¡œ í•œë‹¤.
 
 ### 8.1 Data Collection
 
-src/ingest/collect_data.py´Â Statcast ¹× Lahman µ¥ÀÌÅÍ¸¦ ¼öÁıÇÏ±â À§ÇÑ ÄÚµåÀÌ´Ù. ¼öÁıµÈ µ¥ÀÌÅÍ´Â data/raw/¿¡ ÀúÀåµÈ´Ù.
+ë¨¼ì € Python ê¸°ë°˜ ìˆ˜ì§‘ ì½”ë“œë¥¼ ì‹¤í–‰í•˜ì—¬ ë¡œì»¬ `data/raw/`ì— Lahman ë°ì´í„°ì™€ Statcast í‘œë³¸ ë°ì´í„°ë¥¼ ì €ì¥í•œë‹¤.
 
-### 8.2 Feature Engineering
+```bash
+python src/ingest/collect_data.py
+```
 
-src/pipeline/build_features.py´Â Lahman ½ÃÁğ ¼ºÀû°ú Statcast ¹°¸® ÁöÇ¥¸¦ °áÇÕÇÏ¿© ¼±¼ö-½ÃÁğ ´ÜÀ§ ºĞ¼® µ¥ÀÌÅÍ¸¦ »ı¼ºÇÑ´Ù.
+ìˆ˜ì§‘ ê²°ê³¼ëŠ” ë‹¤ìŒ í´ë”ì— ì €ì¥ëœë‹¤.
 
-ÁÖ¿ä Ã³¸® ³»¿ëÀº ´ÙÀ½°ú °°´Ù.
+```text
+data/raw/lahman/
+data/raw/statcast/
+data/sample/
+data/logs/
+```
 
-- ¼±¼ö ³ªÀÌ °è»ê
-- 2020³â ½ÃÁğ Á¦¿Ü
-- 30¼¼ ÀÌ»ó ¼±¼ö ÇÊÅÍ¸µ
-- Å¸ÀÚ OPS, OBP, SLG °è»ê
-- Åõ¼ö WHIP, ERA °è»ê
-- Statcast Å¸±¸/Åõ±¸ ÁöÇ¥ Áı°è
-- Lahman ID¿Í MLBAM ID ¸ÅÇÎ
-- ´ÙÀ½ ½ÃÁğ ¼º°ú ÁöÇ¥ »ı¼º
+### 8.2 Local Preprocessing
 
-### 8.3 Velocity Bin Analysis
+ìˆ˜ì§‘ëœ raw ë°ì´í„°ë¥¼ ê¸°ë°˜ìœ¼ë¡œ ì„ ìˆ˜-ì‹œì¦Œ ë‹¨ìœ„ ë¶„ì„ìš© ë°ì´í„°ë¥¼ ìƒì„±í•œë‹¤.
 
-src/pipeline/build_velocity_bins.py´Â Å¸ÀÚ°¡ »ó´ë Åõ±¸ ±¸¼Ó ±¸°£º°·Î ¾î¶² Å¸±¸ ÁúÀ» º¸ÀÌ´ÂÁö ºĞ¼®ÇÏ±â À§ÇÑ µ¥ÀÌÅÍ¸¦ »ı¼ºÇÑ´Ù.
+```bash
+python src/pipeline/build_features.py
+python src/pipeline/build_velocity_bins.py
+```
 
-±¸¼Ó ±¸°£Àº ´ÙÀ½°ú °°ÀÌ ±¸¼ºÇÏ¿´´Ù.
+ì£¼ìš” ì „ì²˜ë¦¬ ê²°ê³¼ëŠ” ë‹¤ìŒ ê²½ë¡œì— ì €ì¥ëœë‹¤.
 
-- 85mph ¹Ì¸¸
-- 85~90mph
-- 90~95mph
-- 95mph ÀÌ»ó
+```text
+data/processed/batter_final_model_data.csv
+data/processed/pitcher_final_model_data.csv
+data/processed/statcast_batter_velocity_bin_summary.csv
+```
 
-### 8.4 Hive Analysis
+### 8.3 Analysis and Visualization
 
-hive/analysis_queries.hql¿¡¼­´Â ´Ü¼ø SELECT°¡ ¾Æ´Ï¶ó GROUP BY, CORR µî Åë°èÀû ºĞ¼® Äõ¸®¸¦ ÀÌ¿ëÇØ ¿¬±¸ Áú¹®¿¡ ´äÇÑ´Ù.
+ì—°êµ¬ì§ˆë¬¸ë³„ ë¶„ì„ ê²°ê³¼í‘œì™€ ê·¸ë˜í”„ë¥¼ ìƒì„±í•œë‹¤.
 
-### 8.5 Model Comparison
+```bash
+python src/analyze/run_analysis.py
+python src/model/train_models.py
+python src/visualize/make_plots.py
+```
 
-src/model/train_models.py´Â ±âº» ¼ºÀû ÁöÇ¥¸¸ »ç¿ëÇÑ Model A¿Í Statcast ÁöÇ¥¸¦ Ãß°¡ÇÑ Model BÀÇ ¿¹Ãø ¼º´ÉÀ» ºñ±³ÇÑ´Ù.
+ê²°ê³¼ íŒŒì¼ì€ ë‹¤ìŒ ê²½ë¡œì— ì €ì¥ëœë‹¤.
 
-Æò°¡ÁöÇ¥´Â ´ÙÀ½°ú °°´Ù.
+```text
+results/tables/
+results/figures/
+```
 
-- RMSE
-- MAE
-- R2
+### 8.4 Upload Data to HDFS
 
-## 9. Results
+ì „ì²˜ë¦¬ ê²°ê³¼ CSVê°€ ì¤€ë¹„ëœ ìƒíƒœì—ì„œ HDFS ì—…ë¡œë“œ ìŠ¤í¬ë¦½íŠ¸ë¥¼ ì‹¤í–‰í•œë‹¤.
 
-ÁÖ¿ä °á°ú ÆÄÀÏÀº results/tables/¿Í results/figures/¿¡ ÀúÀåµÈ´Ù.
+```bash
+bash scripts/upload_to_hdfs.sh
+```
 
-### 9.1 Tables
+ì´ ìŠ¤í¬ë¦½íŠ¸ëŠ” ë‹¤ìŒ ë°ì´í„°ë¥¼ HDFSì— ì ì¬í•œë‹¤.
 
-- rq1_batter_age_group_summary.csv
-- rq2_pitcher_age_group_summary.csv
-- rq3_pitcher_spin_correlation.csv
-- rq4_model_performance_comparison.csv
-- rq5_batter_velocity_age_group_summary.csv
+```text
+data/raw/statcast/*.csv
+data/raw/lahman/*.csv
+data/processed/batter_final_model_data.csv
+data/processed/pitcher_final_model_data.csv
+data/processed/statcast_batter_velocity_bin_summary.csv
+results/tables/rq4_model_performance_comparison.csv
+```
 
-### 9.2 Figures
+### 8.5 Create Hive External Tables
 
-- rq1_batter_launch_speed_by_age_group.png
-- rq2_pitcher_release_speed_by_age_group.png
-- rq5_velocity_launch_speed_by_age_group.png
-- batter_velocity_hard_hit_rate_by_age_group.png
-- batter_velocity_estimated_woba_by_age_group.png
+```bash
+hive -f hive/create_tables.hql
+```
 
-## 10. Limitations
+ìƒì„±ë˜ëŠ” ì£¼ìš” Hive í…Œì´ë¸”ì€ ë‹¤ìŒê³¼ ê°™ë‹¤.
 
-º» ÇÁ·ÎÁ§Æ®´Â ´ÙÀ½°ú °°Àº ÇÑ°è¸¦ °¡Áø´Ù.
+* `batter_final_model_data`
+* `pitcher_final_model_data`
+* `statcast_batter_velocity_bin_summary`
+* `model_performance_comparison`
 
-1. Statcast µ¥ÀÌÅÍ´Â ÀüÃ¼ ½ÃÁğ Àü¼ö µ¥ÀÌÅÍ°¡ ¾Æ´Ï¶ó ¿ùº° ±¸°£ Ç¥º» µ¥ÀÌÅÍÀÌ´Ù.
-2. 30¼¼ ÀÌ»ó ¼±¼ö¸¸ ´ë»óÀ¸·Î ÇÏ¹Ç·Î ÀşÀº ¼±¼ö¿Í Á÷Á¢ ºñ±³ÇÏÁö ¾Ê´Â´Ù.
-3. ´ÙÀ½ ½ÃÁğ ¼º°ú°¡ Á¸ÀçÇÏ´Â ¼±¼ö¸¸ ¸ğµ¨ µ¥ÀÌÅÍ¿¡ Æ÷ÇÔµÇ¹Ç·Î ÀºÅğ ¶Ç´Â ¹æÃâ ¼±¼ö´Â Á¦¿ÜµÈ´Ù.
-4. ±¸Àå È¿°ú, ¼öºñ·Â, ¸®±× È¯°æ º¯È­ µîÀº ¿ÏÀüÈ÷ ÅëÁ¦ÇÏÁö ¸øÇß´Ù.
-5. ¿¹Ãø ¸ğµ¨Àº ÇÁ·ÎÁ§Æ®ÀÇ Áß½ÉÀÌ ¾Æ´Ï¶ó Statcast ÁöÇ¥ÀÇ Ãß°¡ ¼³¸í·ÂÀ» È®ÀÎÇÏ±â À§ÇÑ º¸Á¶ ºĞ¼®ÀÌ´Ù.
+### 8.6 Run Hive Analysis Queries
 
-## 11. AI Tool Usage
+```bash
+hive -f hive/analysis_queries.hql
+```
 
-- ChatGPT: ÇÁ·ÎÁ§Æ® ±¸Á¶ Á¡°Ë, README ±¸¼º Á¤¸®, ÄÚµå ÆÄÀÏ ºĞ¸® ¹æÇâ Á¦¾È, º¸°í¼­ ¸ñÂ÷ ¹× ¹ßÇ¥ Èå¸§ Á¤¸®
-- AI µµ±¸´Â ÄÚµå µğ¹ö±ë°ú ¹®¼­ Á¤¸® º¸Á¶ ¸ñÀûÀ¸·Î »ç¿ëÇÏ¿´À¸¸ç, ÃÖÁ¾ µ¥ÀÌÅÍ Ã³¸®¿Í ºĞ¼® °á°ú´Â Á÷Á¢ ½ÇÇàÇÑ °á°ú¸¦ ±â¹İÀ¸·Î ÀÛ¼ºÇÏ¿´´Ù.
+HiveQLì—ì„œëŠ” ë‚˜ì´êµ¬ê°„ë³„ GROUP BY ë¶„ì„, íˆ¬êµ¬ ì§€í‘œì™€ next_WHIPì˜ CORR ë¶„ì„, Model A/B ì„±ëŠ¥ ë¹„êµ ê²°ê³¼ ì¡°íšŒ, íˆ¬êµ¬ êµ¬ì† êµ¬ê°„ë³„ íƒ€êµ¬ ì§ˆ ì§‘ê³„ ë“±ì„ ìˆ˜í–‰í•˜ì˜€ë‹¤.
+
+### 8.7 HDFS/Hive Pipeline Script
+
+ì „ì²˜ë¦¬ ê²°ê³¼ CSVê°€ ì´ë¯¸ ì¤€ë¹„ë˜ì–´ ìˆëŠ” ê²½ìš°, ì•„ë˜ ìŠ¤í¬ë¦½íŠ¸ë¥¼ í†µí•´ HDFS ì—…ë¡œë“œì™€ Hive ë¶„ì„ ë‹¨ê³„ë¥¼ í•œ ë²ˆì— ì‹¤í–‰í•  ìˆ˜ ìˆë‹¤.
+
+```bash
+bash scripts/run_pipeline.sh
+```
+
+ë‹¨, `run_pipeline.sh`ëŠ” Python ë°ì´í„° ìˆ˜ì§‘ ë° ì „ì²˜ë¦¬ ë‹¨ê³„ê¹Œì§€ ìë™ìœ¼ë¡œ ìˆ˜í–‰í•˜ëŠ” ì „ì²´ ETL ìŠ¤í¬ë¦½íŠ¸ê°€ ì•„ë‹ˆë¼, HDFS ì ì¬ì™€ Hive ì‹¤í–‰ ë‹¨ê³„ë¥¼ ë¬¶ì€ ìŠ¤í¬ë¦½íŠ¸ì´ë‹¤.
+
+---
+
+## 9. Analysis Method
+
+### 9.1 Preprocessing
+
+ì „ì²˜ë¦¬ ê³¼ì •ì—ì„œëŠ” ì›ë³¸ íˆ¬êµ¬/íƒ€êµ¬ ë‹¨ìœ„ ë°ì´í„°ë¥¼ ì„ ìˆ˜-ì‹œì¦Œ ë‹¨ìœ„ë¡œ ì¶•ì•½í•˜ê³ , Lahman ì‹œì¦Œ ì„±ì ê³¼ ê²°í•©í•˜ì˜€ë‹¤.
+
+ì£¼ìš” ì²˜ë¦¬ ê¸°ì¤€ì€ ë‹¤ìŒê³¼ ê°™ë‹¤.
+
+* 2015~2024ë…„ ë°ì´í„° ì‚¬ìš©
+* 2020ë…„ ì½”ë¡œë‚˜ ë‹¨ì¶• ì‹œì¦Œ ì œì™¸
+* 30ì„¸ ì´ìƒ ì„ ìˆ˜ ì¤‘ì‹¬ ë¶„ì„
+* íƒ€ì: AB 100 ì´ìƒ, batted ball count 30 ì´ìƒ
+* íˆ¬ìˆ˜: IP 30 ì´ìƒ, pitch count 100 ì´ìƒ
+* ë‹¤ìŒ ì‹œì¦Œ targetì´ ì¡´ì¬í•˜ëŠ” í–‰ë§Œ ëª¨ë¸ ë°ì´í„°ì— í¬í•¨
+* ë‚˜ì´êµ¬ê°„: 30-32ì„¸, 33-35ì„¸, 36ì„¸ ì´ìƒ
+
+### 9.2 Batter Features
+
+íƒ€ì ë¶„ì„ì—ì„œëŠ” ë‹¤ìŒ ì§€í‘œë¥¼ ì‚¬ìš©í•˜ì˜€ë‹¤.
+
+* OPS
+* OBP
+* SLG
+* avg_launch_speed
+* avg_launch_angle
+* hard_hit_rate
+* avg_estimated_woba
+* avg_estimated_slg
+* next_OPS
+
+### 9.3 Pitcher Features
+
+íˆ¬ìˆ˜ ë¶„ì„ì—ì„œëŠ” ë‹¤ìŒ ì§€í‘œë¥¼ ì‚¬ìš©í•˜ì˜€ë‹¤.
+
+* WHIP
+* ERA
+* avg_release_speed
+* avg_effective_speed
+* avg_release_spin_rate
+* avg_release_extension
+* fastball usage/speed/spin/extension
+* breaking ball usage/speed/spin/extension
+* next_WHIP
+
+### 9.4 Model A/B Design
+
+RQ4ì—ì„œëŠ” ê¸°ë³¸ ì„±ì  ë³€ìˆ˜ë§Œ ì‚¬ìš©í•œ Model Aì™€ Statcast ë¬¼ë¦¬ ì§€í‘œë¥¼ ì¶”ê°€í•œ Model Bë¥¼ ë¹„êµí•˜ì˜€ë‹¤.
+
+* Model A
+
+  * íƒ€ì: age, OPS, OBP, SLG
+  * íˆ¬ìˆ˜: age, WHIP, ERA
+
+* Model B
+
+  * Model A ë³€ìˆ˜ì— Statcast ë¬¼ë¦¬ ì§€í‘œ ì¶”ê°€
+
+ë¹„êµí•œ ëª¨ë¸ì€ ë‹¤ìŒê³¼ ê°™ë‹¤.
+
+* Linear Regression
+* Ridge Regression
+* RandomForest Regressor
+
+í‰ê°€ ì§€í‘œëŠ” ë‹¤ìŒì„ ì‚¬ìš©í•˜ì˜€ë‹¤.
+
+* RMSE
+* MAE
+* R2
+
+---
+
+## 10. Results
+
+### 10.1 RQ1: íƒ€ì ë‚˜ì´êµ¬ê°„ë³„ íƒ€êµ¬ ì§ˆ
+
+30ì„¸ ì´ìƒ íƒ€ìì˜ í‰ê·  íƒ€êµ¬ì†ë„ëŠ” 30-32ì„¸, 33-35ì„¸, 36ì„¸ ì´ìƒ êµ¬ê°„ìœ¼ë¡œ ê°ˆìˆ˜ë¡ ì†Œí­ ì¦ê°€í•˜ì˜€ë‹¤. í•˜ë“œíˆíŠ¸ìœ¨ ì—­ì‹œ ê³ ë ¹ êµ¬ê°„ì—ì„œ ë†’ê²Œ ë‚˜íƒ€ë‚¬ë‹¤.
+
+ë‹¤ë§Œ 36ì„¸ ì´ìƒ í‘œë³¸ì€ ìƒëŒ€ì ìœ¼ë¡œ ì‘ê¸° ë•Œë¬¸ì—, ì´ ê²°ê³¼ë¥¼ ë‚˜ì´ê°€ ë“¤ìˆ˜ë¡ íƒ€ê²© ëŠ¥ë ¥ì´ í–¥ìƒëœë‹¤ëŠ” ì˜ë¯¸ë¡œ í•´ì„í•˜ê¸°ë³´ë‹¤ëŠ” ê°•í•œ íƒ€êµ¬ ìƒì‚° ëŠ¥ë ¥ì„ ìœ ì§€í•œ ì„ ìˆ˜ë“¤ì´ ê³ ë ¹ê¹Œì§€ MLBì— ë‚¨ì€ ìƒì¡´ì í¸í–¥ì˜ ì˜í–¥ìœ¼ë¡œ í•´ì„í•˜ëŠ” ê²ƒì´ ì ì ˆí•˜ë‹¤.
+
+### 10.2 RQ2: íˆ¬ìˆ˜ ë‚˜ì´êµ¬ê°„ë³„ êµ¬ì† ë° íšŒì „ìˆ˜
+
+íˆ¬ìˆ˜ëŠ” ë‚˜ì´ê°€ ë“¤ìˆ˜ë¡ í‰ê·  êµ¬ì†ì´ ê°ì†Œí•˜ì˜€ë‹¤. ë°˜ë©´ í‰ê·  íšŒì „ìˆ˜ëŠ” ê³ ë ¹ êµ¬ê°„ì—ì„œ ì¦ê°€í•˜ëŠ” ê²½í–¥ì´ ë‚˜íƒ€ë‚¬ë‹¤.
+
+ì´ëŠ” ê³ ë ¹ íˆ¬ìˆ˜ê°€ êµ¬ì† ì €í•˜ë¥¼ ë‹¨ìˆœíˆ ê°ìˆ˜í•˜ëŠ” ê²ƒì´ ì•„ë‹ˆë¼, íšŒì „ìˆ˜ë‚˜ êµ¬ì¢… íŠ¹ì„±ê³¼ ê°™ì€ ë‹¤ë¥¸ ìš”ì†Œë¥¼ í†µí•´ ê²½ìŸë ¥ì„ ìœ ì§€í–ˆì„ ê°€ëŠ¥ì„±ì„ ì‹œì‚¬í•œë‹¤. ë‹¤ë§Œ ë³¸ ë¶„ì„ë§Œìœ¼ë¡œ íšŒì „ìˆ˜ ì¦ê°€ì˜ ì›ì¸ì„ ë‹¨ì •í•˜ê¸°ëŠ” ì–´ë µë‹¤.
+
+### 10.3 RQ3: íˆ¬êµ¬ ì§€í‘œì™€ next_WHIP ìƒê´€ê´€ê³„
+
+ì§êµ¬ íšŒì „ìˆ˜, ë³€í™”êµ¬ íšŒì „ìˆ˜, í‰ê·  êµ¬ì†ê³¼ ë‹¤ìŒ ì‹œì¦Œ WHIPì˜ ìƒê´€ê´€ê³„ë¥¼ í™•ì¸í•˜ì˜€ë‹¤.
+
+ë¶„ì„ ê²°ê³¼ ì§êµ¬ íšŒì „ìˆ˜ì™€ next_WHIPì€ ê°€ì¥ ëšœë ·í•œ ìŒì˜ ìƒê´€ì„ ë³´ì˜€ê³ , ë³€í™”êµ¬ íšŒì „ìˆ˜ì™€ í‰ê·  êµ¬ì†ì€ ë§¤ìš° ì•½í•œ ìŒì˜ ìƒê´€ì„ ë³´ì˜€ë‹¤. WHIPì€ ë‚®ì„ìˆ˜ë¡ ì¢‹ì€ ì§€í‘œì´ë¯€ë¡œ, ìŒì˜ ìƒê´€ì€ í•´ë‹¹ ì§€í‘œê°€ ë†’ì„ìˆ˜ë¡ ë‹¤ìŒ ì‹œì¦Œ WHIPì´ ë‚®ì•„ì§ˆ ê°€ëŠ¥ì„±ì´ ìˆìŒì„ ì˜ë¯¸í•œë‹¤.
+
+ë‹¤ë§Œ ìƒê´€ê³„ìˆ˜ì˜ ì ˆëŒ€ê°’ì€ í¬ì§€ ì•Šê¸° ë•Œë¬¸ì—, íšŒì „ìˆ˜ë‚˜ êµ¬ì† í•˜ë‚˜ë§Œìœ¼ë¡œ ë‹¤ìŒ ì‹œì¦Œ ì„±ê³¼ë¥¼ ê°•í•˜ê²Œ ì„¤ëª…í•œë‹¤ê³  ë³´ê¸°ëŠ” ì–´ë µë‹¤.
+
+### 10.4 RQ4: Model A/B ì„±ëŠ¥ ë¹„êµ
+
+ê¸°ë³¸ ì„±ì  ë³€ìˆ˜ë§Œ ì‚¬ìš©í•œ Model Aì™€ Statcast ì§€í‘œë¥¼ ì¶”ê°€í•œ Model Bì˜ ì˜ˆì¸¡ ì„±ëŠ¥ì„ ë¹„êµí•˜ì˜€ë‹¤.
+
+íƒ€ì next_OPS ì˜ˆì¸¡ì—ì„œëŠ” Model B RandomForestê°€ ê°€ì¥ ë‚®ì€ RMSEë¥¼ ë³´ì˜€ê³ , íˆ¬ìˆ˜ next_WHIP ì˜ˆì¸¡ì—ì„œëŠ” Model B Ridgeê°€ ê°€ì¥ ë‚®ì€ RMSEë¥¼ ë³´ì˜€ë‹¤. ì¦‰, ë‘ ë°ì´í„°ì…‹ ëª¨ë‘ì—ì„œ Statcast ì§€í‘œë¥¼ ì¶”ê°€í•œ Model Bì˜ RMSEê°€ Model Aë³´ë‹¤ ë‚®ê²Œ ë‚˜íƒ€ë‚¬ë‹¤.
+
+ë‹¤ë§Œ ê°œì„  í­ì€ í¬ì§€ ì•Šì•˜ê¸° ë•Œë¬¸ì—, Statcast ë¬¼ë¦¬ ì§€í‘œê°€ ë‹¤ìŒ ì‹œì¦Œ ì„±ê³¼ ì˜ˆì¸¡ì— ì¼ì • ë¶€ë¶„ ë„ì›€ì„ ì£¼ì§€ë§Œ ë‹¨ë…ìœ¼ë¡œ ê°•í•œ ì˜ˆì¸¡ë ¥ì„ ì œê³µí•œë‹¤ê³  ë³´ê¸°ëŠ” ì–´ë µë‹¤.
+
+### 10.5 RQ5: íˆ¬êµ¬ êµ¬ì† êµ¬ê°„ë³„ íƒ€ì íƒ€êµ¬ ì§ˆ
+
+íˆ¬êµ¬ êµ¬ì† êµ¬ê°„ì€ ë‹¤ìŒê³¼ ê°™ì´ ë‚˜ëˆ„ì—ˆë‹¤.
+
+* 85mph ë¯¸ë§Œ
+* 85-90mph
+* 90-95mph
+* 95mph ì´ìƒ
+
+ë¶„ì„ ê²°ê³¼ ì „ë°˜ì ìœ¼ë¡œ 90-95mph êµ¬ê°„ì—ì„œ í‰ê·  íƒ€êµ¬ì†ë„ê°€ ê°€ì¥ ë†’ê²Œ ë‚˜íƒ€ë‚¬ìœ¼ë©°, 36ì„¸ ì´ìƒ êµ¬ê°„ì—ì„œë„ 90-95mphì˜ í‰ê·  íƒ€êµ¬ì†ë„ê°€ ê°€ì¥ ë†’ì•˜ë‹¤.
+
+ì´ ê²°ê³¼ëŠ” ê³ ë ¹ íƒ€ì ì¤‘ ê°•í•œ íƒ€êµ¬ë¥¼ ìƒì‚°í•  ìˆ˜ ìˆëŠ” ì„ ìˆ˜ë“¤ì´ ë‚¨ì•„ ìˆë‹¤ëŠ” ì•ì„  í•´ì„ê³¼ ì—°ê²°ë˜ì§€ë§Œ, êµ¬ì¢…, ì½”ìŠ¤, ì¹´ìš´íŠ¸, í‘œë³¸ ìˆ˜ì˜ ì˜í–¥ì„ ë°›ì„ ìˆ˜ ìˆìœ¼ë¯€ë¡œ ë³´ì¡°ì ì¸ ê²°ê³¼ë¡œ í•´ì„í•˜ëŠ” ê²ƒì´ ì ì ˆí•˜ë‹¤.
+
+---
+
+## 11. Output Files
+
+### 11.1 Result Tables
+
+ì£¼ìš” ê²°ê³¼ CSVëŠ” `results/tables/`ì— ì €ì¥í•˜ì˜€ë‹¤.
+
+* `rq1_batter_age_group_summary.csv`
+* `rq1_batter_age_summary.csv`
+* `rq2_pitcher_age_group_summary.csv`
+* `rq2_pitcher_age_summary.csv`
+* `rq3_pitcher_randomforest_feature_importance.csv`
+* `rq3_pitcher_spin_correlation.csv`
+* `rq3_pitcher_spin_feature_importance.csv`
+* `rq4_model_improvement_summary.csv`
+* `rq4_model_performance_comparison.csv`
+* `rq5_batter_velocity_age_group_summary.csv`
+
+### 11.2 Result Figures
+
+ì£¼ìš” ê²°ê³¼ ê·¸ë˜í”„ëŠ” `results/figures/`ì— ì €ì¥í•˜ì˜€ë‹¤.
+
+* `rq1_batter_avg_launch_speed_final.png`
+* `rq1_batter_hard_hit_rate_final.png`
+* `rq1_batter_delta_next_ops_final.png`
+* `rq2_pitcher_avg_release_speed_final.png`
+* `rq2_pitcher_avg_spin_rate_final.png`
+* `rq2_pitcher_delta_next_whip_final.png`
+* `rq3_pitcher_correlation_final.png`
+* `rq4_model_ab_best_rmse_final.png`
+* `rq5_velocity_age_line_final.png`
+
+ìµœì¢… ë³´ê³ ì„œì—ëŠ” í•µì‹¬ ê²°ê³¼ í•´ì„ì— í•„ìš”í•œ ê·¸ë˜í”„ë¥¼ ì„ ë³„í•˜ì—¬ ì‚¬ìš©í•˜ì˜€ë‹¤.
+
+---
+
+## 12. Data Management
+
+ëŒ€ìš©ëŸ‰ raw/processed ë°ì´í„°ëŠ” GitHubì— ì—…ë¡œë“œí•˜ì§€ ì•Šì•˜ë‹¤.
+
+* `data/raw/`: ì›ë³¸ ë°ì´í„° ì €ì¥ í´ë”. GitHub ì—…ë¡œë“œ ì œì™¸
+* `data/processed/`: ì „ì²˜ë¦¬ ê²°ê³¼ CSV ì €ì¥ í´ë”. GitHub ì—…ë¡œë“œ ì œì™¸
+* `data/logs/`: ìˆ˜ì§‘ ë° ì²˜ë¦¬ ë¡œê·¸. GitHub ì—…ë¡œë“œ ì œì™¸
+* `data/sample/`: ì œì¶œ í™•ì¸ìš© ìƒ˜í”Œ ë°ì´í„°. GitHubì— í¬í•¨
+
+`.gitignore`ë¥¼ í†µí•´ ëŒ€ìš©ëŸ‰ ë°ì´í„° íŒŒì¼ì€ ì œì™¸í•˜ê³ , ìƒ˜í”Œ ë°ì´í„°ì™€ ê²°ê³¼ íŒŒì¼ë§Œ repositoryì— í¬í•¨í•˜ì˜€ë‹¤.
+
+---
+
+## 13. Limitations
+
+ë³¸ í”„ë¡œì íŠ¸ëŠ” ë‹¤ìŒê³¼ ê°™ì€ í•œê³„ë¥¼ ê°€ì§„ë‹¤.
+
+1. Statcast ë°ì´í„°ëŠ” ì „ì²´ ì‹œì¦Œ ì „ìˆ˜ ë°ì´í„°ê°€ ì•„ë‹ˆë¼ ì›”ë³„ í‘œë³¸ ë°ì´í„°ì´ë‹¤.
+2. 30ì„¸ ì´ìƒ ì„ ìˆ˜ë§Œ ëŒ€ìƒìœ¼ë¡œ í•˜ë¯€ë¡œ 20ëŒ€ ì„ ìˆ˜ì™€ ì§ì ‘ ë¹„êµí•˜ì§€ ì•Šì•˜ë‹¤.
+3. ë‹¤ìŒ ì‹œì¦Œ ì„±ê³¼ê°€ ì¡´ì¬í•˜ëŠ” ì„ ìˆ˜ë§Œ ëª¨ë¸ ë°ì´í„°ì— í¬í•¨ë˜ë¯€ë¡œ ì€í‡´Â·ë°©ì¶œ ì„ ìˆ˜ëŠ” ì œì™¸ë˜ì—ˆë‹¤.
+4. OPSì™€ WHIPì€ êµ¬ì¥ íš¨ê³¼, ìˆ˜ë¹„ë ¥, ë¦¬ê·¸ í™˜ê²½ ë³€í™” ë“±ì„ ì™„ì „íˆ í†µì œí•˜ì§€ ëª»í•œë‹¤.
+5. ëª¨ë¸ë§ì€ ì„±ëŠ¥ íŠœë‹ë³´ë‹¤ Statcast ì§€í‘œ ì¶”ê°€ì— ë”°ë¥¸ ì„±ëŠ¥ ì°¨ì´ë¥¼ í™•ì¸í•˜ëŠ” ë° ì´ˆì ì„ ë‘ì—ˆë‹¤.
+
+í–¥í›„ì—ëŠ” ì „ì²´ ì‹œì¦Œ ì „ìˆ˜ ë°ì´í„° ìˆ˜ì§‘, 20ëŒ€ ë¹„êµêµ° ì¶”ê°€, OPS+, wRC+, FIP, xERA, park factor, íŒ€ ìˆ˜ë¹„ ì§€í‘œ ë“± ì¶”ê°€ ë³€ìˆ˜ë¥¼ ê²°í•©í•˜ì—¬ ë” ì •êµí•œ ì„ ìˆ˜ ë…¸í™” ë¶„ì„ì„ ìˆ˜í–‰í•  ìˆ˜ ìˆë‹¤.
+
+---
+
+## 14. References
+
+* Apache Hadoop Documentation: https://hadoop.apache.org/
+* Apache Hive Documentation: https://hive.apache.org/
+* Apache Spark Documentation: https://spark.apache.org/docs/latest/
+* pybaseball GitHub Repository: https://github.com/jldbc/pybaseball
+* Baseball Databank / Lahman Database: https://github.com/chadwickbureau/baseballdatabank
+* MLB Baseball Savant Statcast: https://baseballsavant.mlb.com/statcast_search
+* Matplotlib Documentation: https://matplotlib.org/
+* scikit-learn Documentation: https://scikit-learn.org/
+
+---
+
+## 15. AI Tool Usage
+
+* ChatGPT was used for project structure review, debugging assistance, README organization, visualization idea review, and report editing support.
+* Data collection, Python/Spark preprocessing, HDFS/Hive execution, analysis query execution, result capture, and final GitHub organization were performed by the author.
