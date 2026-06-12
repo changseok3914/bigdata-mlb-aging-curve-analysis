@@ -486,6 +486,4 @@ RQ4에서는 기본 성적 변수만 사용한 Model A와 Statcast 물리 지표
 ---
 
 ## 15. AI Tool Usage
-
-* ChatGPT was used for project structure review, debugging assistance, README organization, visualization idea review, and report editing support.
-* Data collection, Python/Spark preprocessing, HDFS/Hive execution, analysis query execution, result capture, and final GitHub organization were performed by the author.
+* ChatGPT는 프로젝트 구조 점검, 오류 메시지 원인 파악, README 구성 정리, 시각화 구성 아이디어 검토, 보고서 문장 다듬기와 편집 보조에 사용하였다.
